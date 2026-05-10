@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二手商品交易系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>二手集市</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#home" onclick="showPage('home')">首页</a></li>
+                <li><a href="#products" onclick="showPage('products')">商品列表</a></li>
+                <li><a href="#publish" onclick="showPage('publish')">发布商品</a></li>
+            </ul>
+        </nav>
+        <div class="user-info">
+            <span id="user-name" style="display: none;">欢迎, <span id="nickname"></span></span>
+            <button id="login-btn" onclick="showPage('login')">登录</button>
+            <button id="register-btn" onclick="showPage('register')">注册</button>
+            <button id="logout-btn" style="display: none;" onclick="logout()">退出</button>
+            <button id="profile-btn" style="display: none;" onclick="showPage('profile')">个人中心</button>
+        </div>
+    </header>
+
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="搜索商品...">
+        <button onclick="searchProducts()">搜索</button>
+        <select id="category-select" onchange="filterByCategory()">
+            <option value="">全部分类</option>
+        </select>
+    </div>
+
+    <main>
+        <div id="home" class="page">
+            <h2>热门商品</h2>
+            <div class="product-grid" id="home-products"></div>
+        </div>
+
+        <div id="products" class="page" style="display: none;">
+            <h2>商品列表</h2>
+            <div class="product-grid" id="product-list"></div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <div id="product-detail" class="page" style="display: none;">
+            <div id="detail-content"></div>
+        </div>
+
+        <div id="login" class="page" style="display: none;">
+            <form id="login-form">
+                <h2>用户登录</h2>
+                <input type="text" id="login-username" placeholder="用户名/手机号" required>
+                <input type="password" id="login-password" placeholder="密码" required>
+                <button type="submit">登录</button>
+                <p class="error" id="login-error"></p>
+            </form>
+        </div>
+
+        <div id="register" class="page" style="display: none;">
+            <form id="register-form">
+                <h2>用户注册</h2>
+                <input type="text" id="reg-username" placeholder="用户名" required>
+                <input type="password" id="reg-password" placeholder="密码" required>
+                <input type="text" id="reg-phone" placeholder="手机号" required>
+                <input type="email" id="reg-email" placeholder="邮箱（可选）">
+                <input type="text" id="reg-nickname" placeholder="昵称（可选）">
+                <button type="submit">注册</button>
+                <p class="error" id="register-error"></p>
+            </form>
+        </div>
+
+        <div id="publish" class="page" style="display: none;">
+            <form id="publish-form" enctype="multipart/form-data">
+                <h2>发布商品</h2>
+                <input type="text" id="publish-name" placeholder="商品名称" required>
+                <textarea id="publish-desc" placeholder="商品描述"></textarea>
+                <input type="number" id="publish-price" placeholder="售价" step="0.01" required>
+                <input type="number" id="publish-original-price" placeholder="原价" step="0.01">
+                <select id="publish-category" required>
+                    <option value="">选择分类</option>
+                </select>
+                <input type="number" id="publish-stock" placeholder="库存数量" value="1" min="1" required>
+                
+                <div class="upload-section">
+                    <label>商品图片（支持多张）</label>
+                    <input type="file" id="publish-images" accept="image/*" multiple>
+                    <div id="upload-preview"></div>
+                </div>
+                
+                <button type="submit">发布</button>
+                <p class="error" id="publish-error"></p>
+            </form>
+        </div>
+
+        <div id="profile" class="page" style="display: none;">
+            <h2>个人中心</h2>
+            <div class="profile-actions">
+                <button class="btn-primary" onclick="openChangePasswordModal()">修改密码</button>
+                <button id="admin-btn" class="btn-admin" style="display:none;" onclick="showPage('admin')">管理后台</button>
+            </div>
+            <div id="user-profile"></div>
+            
+            <h3>我的商品</h3>
+            <div class="product-grid" id="my-products"></div>
+            
+            <h3>我的订单</h3>
+            <div class="order-tabs">
+                <button class="tab-active" onclick="loadOrders('buyer')">我买到的</button>
+                <button onclick="loadOrders('seller')">我卖出的</button>
+            </div>
+            <div id="my-orders"></div>
+            
+            <h3>收到的留言</h3>
+            <div id="my-messages"></div>
+            
+            <h3>我的评价</h3>
+            <div id="my-reviews"></div>
+        </div>
+
+        <div id="admin" class="page" style="display: none;">
+            <h2>管理后台</h2>
+            <button onclick="showPage('profile')">返回个人中心</button>
+            
+            <div class="admin-tabs">
+                <button class="tab-active" onclick="loadAdminUsers()">用户管理</button>
+                <button onclick="loadAdminProducts()">商品管理</button>
+                <button onclick="loadAdminOrders()">订单管理</button>
+                <button onclick="loadAdminStats()">统计数据</button>
+            </div>
+            
+            <div id="admin-content"></div>
+        </div>
+
+        <div id="order-detail" class="page" style="display: none;">
+            <div id="order-content"></div>
+        </div>
+
+        <div id="payment" class="page" style="display: none;">
+            <h2>确认支付</h2>
+            <div id="payment-content"></div>
+        </div>
+    </main>
+
+    <!-- 修改密码模态框 -->
+    <div id="change-password-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeChangePasswordModal()">&times;</span>
+            <h2>修改密码</h2>
+            <form id="change-password-form">
+                <input type="password" id="old-password" placeholder="请输入原密码" required>
+                <input type="password" id="new-password" placeholder="请输入新密码（6-20位）" required>
+                <input type="password" id="confirm-password" placeholder="请再次输入新密码" required>
+                <button type="submit">确认修改</button>
+                <p class="error" id="change-password-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 二手商品交易系统 - 数据库分析与设计实习</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
